@@ -1,0 +1,91 @@
+*{
+    font-family: 'Poppins',sans-serif;
+}
+.hero section{
+    padding: 80px 5% 0;
+    max-width: 100%;
+    height: calc(100vh - 80px);
+    background-image: url('../../assets/gym-gradient.webp');
+    background-size: cover;
+    background-attachment: fixed;
+    display: flex;
+}
+.text-center{
+  text-align: center;
+}
+.col-md-6{
+    padding: 10px;
+    max-width: 50%;
+    flex: 50%;
+}
+.hero-1{
+    position: static;
+    z-index: 2;
+    justify-content: center;
+    flex-direction: column;
+    padding-top: 7rem;
+}
+.hero-1 h1 {
+    font-size: 4.2rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0;
+    color:#a84155;
+}
+.hero-1 h1 span{
+    font-size: 7rem;
+    position: absolute;
+    font-weight: 600;
+    margin-left: 20px;
+    margin-top: -25px;
+    display: block;
+    font-family: "Caveat",sans-serif;
+    color: #000;
+}
+.p-hero{
+    margin-top: 80px;
+    width: 600px;
+    max-width: 100%;
+}
+  .vanja-hero-img{
+    z-index: 1;
+    position: relative;
+    height: 100%;
+    max-width: 100%;
+  }
+  .circle{
+    position: absolute;
+    right: 10%;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background-color: #a84155;
+  }
+  .gradient{
+    z-index: 2;
+    position: absolute;
+    height: 150px;
+    margin-top: -75px;
+    width: 100%;
+    background: linear-gradient(90deg, #fff7ad, #ffa9f9);
+    border-radius: 50%;
+  }
+  @media (max-width: 768px) {
+    .hero-1 h1{
+      margin-bottom: 0px;
+    }
+    section{
+      flex-direction: column;
+    }
+    .col-md-6 {
+      flex: 100%;
+      max-width: 100% !important;
+    }
+    .hero-1 h1 span {
+      font-size: 3.6rem;
+      margin-left: 0;
+    }
+    .vanja-hero-img{
+      width: 200px;
+    }
+  }

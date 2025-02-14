@@ -1,0 +1,71 @@
+.pio{
+    background-image: url('../../assets/bg-splash.png');
+    background-color: white;
+    background-position:bottom left;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    padding: 80px;
+    display: flex;
+}
+.pitanja{
+    width: 50%;
+    max-width: 100%;
+    position: relative;
+    z-index: 2;
+}
+.pitanja h3{
+    color:#000;
+    font-size: 3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.pitanja h5{
+    color:#a84155;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 30px 0 10px;
+}
+.splash{
+    width: 50%;
+    position: absolute;
+    right: 0;
+}
+.vanja-splash{
+    z-index: 1;
+    width: 450px;
+    position: relative;
+    object-fit: contain;
+}
+.buttons{
+    display: flex;
+    justify-content: flex-end;
+}
+.b2{
+    margin-left: 30px;
+    border-color: #a84155;
+    color: #a84155;
+    background-color: #ffa9f9;
+}
+.b2:hover{
+    color: white;
+    background-color: #a84155;
+}
+@media screen and (max-width: 769px){
+    .pio{
+        flex-direction: column;
+        padding: 10px;
+    }
+    .pitanja{
+        width: auto;
+        padding: 10px;
+    }
+    .buttons{
+        margin: 30px 0 10px;
+    }
+    .vanja-splash{
+        display: none;
+    }
+    .splash{
+        display: none;
+    }
+}

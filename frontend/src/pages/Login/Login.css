@@ -1,0 +1,37 @@
+.login{
+    justify-content: center;
+    align-items: center;
+}
+.login-card{
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    margin-top: 100px;
+    padding: 40px 20px;
+    width: fit-content;
+}
+.login-card h1{
+    color:#000;
+    text-align: center;
+    margin:0;
+    font-size: 3rem;
+}
+.login-card input{
+    padding: 5px 15px;
+    display: flex;
+    background:#f0f0f0;
+    border: none;
+    margin: 20px 0;
+}
+.login-card button{
+    margin-top: 20px;
+    align-self: center;
+    width: 100%;
+}
+.make-account{
+    color: #6d6d6d;
+    text-decoration: none;
+    text-align: center;
+    font-size: 12px;
+    margin-top: 15px;
+}

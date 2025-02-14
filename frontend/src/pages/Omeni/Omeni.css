@@ -1,0 +1,143 @@
+.o-meni{
+    background: linear-gradient(45deg, white, navajowhite, pink);
+}
+.o-meni section{
+    padding: 120px;
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    z-index: 1;
+}
+.o-meni section span{
+    position: absolute;
+}
+.o-meni section img{
+    width: 60%;
+}
+span h1{
+    text-transform: uppercase;
+    width: 60%;
+    color: #000;
+    margin: 0 0 0 120px;
+    font-size: 4.5rem;
+    font-weight: 900;
+}
+span h2{
+    font-family: "Caveat",sans-serif;
+    color: #a84155;
+    text-transform: none;
+    margin-left: 120px;
+    margin-top: 0;
+}
+.big-container{
+    padding: 0 120px;
+    position: relative;
+    
+}
+.container{
+    width: 65%;
+}
+.container p{
+    margin: 0;
+}
+.next{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.next img {
+    width: 35%;
+    height: 500px;
+    object-fit: cover;
+    margin: 40px 0;
+}
+.next-text{
+    width: 55%;
+    text-align: end;
+}
+.big-container h3{
+    color: #a84155;
+    margin: 0;
+    font-size: 2.5rem;
+}
+.p1, .p2{
+    width: 50%;
+}
+.p1{
+    padding-top: 30px;
+    padding-right: 30px;
+}
+.p2{
+    padding-top: 30px;
+    padding-left: 30px;
+}
+p span{
+    font-weight: 700;
+}
+.vid{
+    padding: 60px 0;
+    justify-content: center;
+}
+iframe{
+    width: 60%;
+    height: 360px;
+}
+.yt{
+    height: 360px;
+    margin-left: 30px;
+}
+.yt2{
+    display: none;
+}
+.splashh{
+    width: 100%;
+    position: absolute;
+    margin-top: -20%;
+    opacity: 0.6;
+}
+@media (max-width: 768px){
+    span h1{
+        margin: 120px 0 0;
+        width: 100%;
+        font-size: 3rem;
+    }
+    .o-meni section {
+        padding: 20px;
+    }
+    .o-meni section span {
+        position: relative;
+    }
+    .o-meni section img{
+        width: 100%;
+    }
+    .big-container {
+        padding: 20px;
+    }
+    .container{
+        width: 100%;
+    }
+    .next{
+        flex-direction: column;
+    }
+    .next img {
+        width: 100%;
+    }
+    .next-text {
+        width: 100%;
+        text-align: left;
+    }
+    .p1, .p2{
+        width: 100%;
+        padding: 0;
+    }
+    iframe{
+        width: 100%;
+    }
+    .yt{
+        display: none;
+    }
+    .yt2{
+        display: block;
+        margin-top: 30px;
+    }
+}

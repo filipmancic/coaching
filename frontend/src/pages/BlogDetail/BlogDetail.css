@@ -1,0 +1,35 @@
+.blog-detail{
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    padding: 40px;
+}
+.blog-info{
+    padding: 120px;
+}
+.blog-detail img{
+    max-width: 100%;
+    width: 600px;
+    margin: 60px auto 0;
+}
+.blog-detail h1{
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    color: #a84155;
+}
+.blog-detail p{
+    font-size: 1.2rem;
+}
+@media (max-width: 768px) {
+    .blog-info{
+        padding: 60px 0px 0px;
+    }
+    .blog-detail p{
+        font-size: 1rem;
+    }
+    .blog-detail{
+        padding: 20px;
+    }
+  }

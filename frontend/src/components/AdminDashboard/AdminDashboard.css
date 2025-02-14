@@ -1,0 +1,39 @@
+.admin-dashboard{
+    padding: 100px;
+    justify-content: center;
+}
+.client-selection h3{
+    color: #000;
+}
+.create{
+    padding: 0 80px;
+    color: #000;
+}
+.create div{
+    margin: 20px auto;
+}
+.right-panel{
+    display: flex;
+    padding: 0 80px;
+    flex-direction: column;
+}
+.dashb{
+    display: flex;
+    padding: 20px;
+    background-color: #d6a8a8;
+    border-radius: 20px;
+}
+form div{
+    margin: 10px auto;
+}
+@media screen and (max-width: 768px){
+    .admin-dashboard{
+        padding: 20px 0 0 0;
+    }
+    .dashb{
+        display: block;
+    }
+    .right-panel{
+        padding: 0;
+    }
+}
