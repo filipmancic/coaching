@@ -2,12 +2,11 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt')
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const util = require('util');
+const nodemailer = require('nodemailer');
 const dbQuery = util.promisify(db.query).bind(db);
 
-/** GET /api/admin/clients
- * Vraća listu svih klijenata (id, ime, email)
- */
 router.get('/clients', async (req, res) => {
   try {
     const query = 'SELECT id, ime, email FROM klijent';
@@ -19,9 +18,6 @@ router.get('/clients', async (req, res) => {
   }
 });
 
-/** GET /api/admin/plans
- * Vraća listu svih planova (id, naziv)
- */
 router.get('/plans', async (req, res) => {
   try {
     const query = 'SELECT id, naziv FROM plan';
@@ -43,11 +39,6 @@ router.get('/exercises', async (req, res) => {
     }
   });
   
-
-/** POST /api/admin/create-plan
- * Kreira novi plan sa prosleđenim nazivom.
- * Očekivano telo: { naziv }
- */
 router.post('/create-plan', async (req, res) => {
   const { naziv } = req.body;
   try {
@@ -60,15 +51,10 @@ router.post('/create-plan', async (req, res) => {
   }
 });
 
-/** POST /api/admin/add-training
- * Dodaje trening (stavku) u postojeći plan.
- * Očekivano telo: { planId, naziv_nedelje, trening_dan, vezba_naziv, tezina, broj_ponavljanja }
- */
 router.post('/add-training', async (req, res) => {
-  const { planId, naziv_nedelje, trening_dan, vezba_naziv, tezina, broj_ponavljanja } = req.body;
+  const { planId, naziv_nedelje, trening_dan, vezba_naziv, tezina, broj_ponavljanja, napomena } = req.body;
 
   try {
-    // Provera i kreiranje nedelje za dati plan
     const nedeljaQuery = 'SELECT id FROM nedelja WHERE plan_id = ? AND naziv_nedelje = ?';
     let nedeljaResults = await dbQuery(nedeljaQuery, [planId, naziv_nedelje]);
     let nedelja_id;
@@ -80,7 +66,6 @@ router.post('/add-training', async (req, res) => {
       nedelja_id = nedeljaResults[0].id;
     }
 
-    // Provera i kreiranje treninga (dana) u okviru te nedelje
     const treningQuery = 'SELECT id FROM trening WHERE nedelja_id = ? AND dan = ?';
     let treningResults = await dbQuery(treningQuery, [nedelja_id, trening_dan]);
     let trening_id;
@@ -92,9 +77,8 @@ router.post('/add-training', async (req, res) => {
       trening_id = treningResults[0].id;
     }
 
-    // Ubacivanje zapisa u trening_vezba
-    const insertTreningVezbaQuery = 'INSERT INTO trening_vezba (trening_id, vezba_id, tezina, broj_ponavljanja) VALUES (?, ?, ?, ?)';
-    await dbQuery(insertTreningVezbaQuery, [trening_id, vezba_naziv, tezina, broj_ponavljanja]);
+    const insertTreningVezbaQuery = 'INSERT INTO trening_vezba (trening_id, vezba_id, tezina, broj_ponavljanja, napomena) VALUES (?, ?, ?, ?, ?)';
+    await dbQuery(insertTreningVezbaQuery, [trening_id, vezba_naziv, tezina, broj_ponavljanja, napomena]);
 
     res.status(200).json({ message: 'Trening uspešno dodat u plan' });
   } catch (error) {
@@ -103,10 +87,6 @@ router.post('/add-training', async (req, res) => {
   }
 });
 
-/** POST /api/admin/assign-plan
- * Dodeljuje plan klijentu.
- * Očekivano telo: { clientId, planId }
- */
 router.post('/assign-plan', async (req, res) => {
   const { clientId, planId } = req.body;
   try {
@@ -133,49 +113,162 @@ router.post('/assign-meal-plan', async (req, res) => {
     res.status(500).json({ message: 'Greška pri dodeli plana' });
   }
 });
+ router.post('/create-client', async (req, res, next) => {
+  const { ime, prezime, email, password, obavestiKlijenta } = req.body;
+  if (!ime || !prezime || !email || !password) {
+      return res.status(400).json({ message: 'Sva polja su obavezna!' });
+  }
 
-module.exports = router;
+  try {
+      db.query('SELECT * FROM klijent WHERE email = ?', [email], async (err, results) => {
+          if (err) {
+              console.error('Error querying database:', err);
+              return res.status(500).json({ message: 'Server error' });
+          }
 
-router.post('/create-client', async (req, res, next) => {
-    const { ime, prezime, email, password } = req.body;
-    //console.log(req.body)
-    if (!ime || !prezime || !email || !password) {
-        return res.status(400).json({ message: 'Sva polja su obavezna!' });
+          if (results.length > 0) {
+              return res.status(409).json({ message: 'Korisnik sa ovim emailom već postoji.' });
+          }
+
+          const hashedPw = await bcrypt.hash(password, 10);
+          db.query(
+              'INSERT INTO klijent (ime, prezime, email, password) VALUES (?, ?, ?, ?)',
+              [ime, prezime, email, hashedPw],
+              async (err, result) => {
+                  if (err) {
+                      console.error('Error inserting user:', err);
+                      return res.status(500).json({ message: 'Server error' });
+                  }
+                  if (obavestiKlijenta) {
+                      try {
+                          let transporter = nodemailer.createTransport({
+                            host: 'mail.cupavitrener.rs',
+                            port: 465,
+                            secure: true, 
+                            auth: {
+                                user: 'vanja@cupavitrener.rs',
+                                pass: process.env.MAILER_PASS
+                            }
+                          });
+
+                          let mailOptions = {
+                            from: "vanja@cupavitrener.rs",
+                            to: email,
+                            subject: 'Treniraj sa Čupavom',
+                            text: `Poštovani ${ime},\n\nVaš nalog je uspešno kreiran. Vaš email je ${email}, a lozinka je ${password}. Molim Vas da čuvate pažljivo podatke.\n\nPozdrav,\nČupavi Trener`
+                        };
+
+                          await transporter.sendMail(mailOptions);
+                      } catch (emailError) {
+                          console.error('Error sending email:', emailError);
+                      }
+                  }
+
+                  res.status(201).json({
+                      message: 'Korisnik uspešno registrovan.',
+                      userId: result.insertId
+                  });
+                  next();
+              }
+          );
+      });
+  } catch (error) {
+      res.status(500).json({ message: 'Server error' });
+  }
+}); 
+
+router.delete('/delete-client', async (req, res, next) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ message: 'Email je obavezan!' });
+  }
+
+  try {
+    db.query('DELETE FROM klijent WHERE email = ?', [email], (err, result) => {
+      if (err) {
+        console.error('Error deleting client:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Klijent nije pronađen.' });
+      }
+      res.status(200).json({ message: 'Klijent uspešno obrisan.' });
+      next();
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+router.delete('/delete-plan', async (req, res, next) => {
+  const { planId } = req.body;
+  
+  if (!planId) {
+    return res.status(400).json({ message: 'Plan ID je obavezan!' });
+  }
+  
+  try {
+    db.query('DELETE FROM plan WHERE id = ?', [planId], (err, result) => {
+      if (err) {
+        console.error('Error deleting plan:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Plan nije pronađen.' });
+      }
+      res.status(200).json({ message: 'Plan uspešno obrisan.' });
+      next();
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'img/'); // dodati putanju
+  },
+  filename: function(req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage: storage });
+
+router.post('/create-blog', upload.single('image'), (req, res, next) => {
+  const { title, preview_text, blog_text } = req.body;
+  const image = req.file ? req.file.filename : null;
+  if (!title || !preview_text || !blog_text) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+  db.query(
+    'INSERT INTO blog (title, preview_text, blog_text, image) VALUES (?, ?, ?, ?)',
+    [title, preview_text, blog_text, image],
+    (err, result) => {
+      if (err) {
+        console.error('Error inserting blog post:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+      res.status(201).json({ message: 'Blog post created successfully', blogId: result.insertId });
+      next();
     }
+  );
+});
 
-    try {
-
-        db.query('SELECT * FROM klijent WHERE email = ?', [email], async (err, results) => {
-            if (err) {
-                console.error('Error querying database:', err);
-                return res.status(500).json({ message: 'Server error' });
-            }
-
-            if (results.length > 0) {
-                return res.status(409).json({ message: 'Korisnik sa ovim emailom već postoji.' });
-            }
-
-            const hashedPw = await bcrypt.hash(password, 10);
-            db.query(
-                'INSERT INTO klijent (ime, prezime, email, password) VALUES (?, ?, ?, ?)',
-                [ime, prezime, email, hashedPw],
-                (err, result) => {
-                    if (err) {
-                        console.error('Error inserting user:', err);
-                        return res.status(500).json({ message: 'Server error' });
-                    }
-
-                    res.status(201).json({
-                        message: 'Korisnik uspešno registrovan.',
-                        userId: result.insertId
-                    });
-                    next();
-                }
-            );
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ message: 'Server error' });
+router.delete('/delete-blog', (req, res, next) => {
+  const { blogId } = req.body;
+  if (!blogId) {
+    return res.status(400).json({ message: 'Blog ID is required.' });
+  }
+  db.query('DELETE FROM blog WHERE title = ?', [blogId], (err, result) => {
+    if (err) {
+      console.error('Error deleting blog post:', err);
+      return res.status(500).json({ message: 'Server error' });
     }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Blog post not found.' });
+    }
+    res.status(200).json({ message: 'Blog post deleted successfully' });
+    next();
+  });
 });
 module.exports = router;

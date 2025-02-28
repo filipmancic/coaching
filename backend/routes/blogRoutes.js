@@ -1,15 +1,9 @@
-// blogRoutes.js
 const express = require('express');
 const router = express.Router();
 const util = require('util');
 const db = require('../config/db'); 
 const dbQuery = util.promisify(db.query).bind(db);
 
-/**
- * GET /api/blogs
- * Parametri (opciono): offset, limit
- * Vraća blogove sortirane po id-u opadajuće (najnoviji prvi)
- */
 router.get('/blogs', async (req, res) => {
   let { offset, limit } = req.query;
   offset = offset ? parseInt(offset) : 0;
@@ -23,17 +17,20 @@ router.get('/blogs', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-/**
- * GET /api/blog/:slug
- * Preuzima blog post na osnovu slug-a (npr. "blog-title")
- * Slug se generiše pretvaranjem naslova u mala slova i zamenom razmaka sa "-".
- */
+router.get('/blogs-all', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM blog ORDER BY id';
+    const blogs = await dbQuery(query);
+    res.status(200).json({ blogs });
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 router.get('/blog/:slug', async (req, res) => {
   const { slug } = req.params;
   try {
-    // Koristimo MySQL funkcije za transformaciju naslova u slug
-    // Napomena: Ovo je osnovno rešenje i možda neće pokriti sve slučajeve
+
     const query = "SELECT * FROM blog WHERE REPLACE(LOWER(title), ' ', '-') = ?";
     const results = await dbQuery(query, [slug]);
     if (results.length === 0) {

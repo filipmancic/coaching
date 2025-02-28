@@ -10,7 +10,7 @@ router.get('/verify',userVerification, (req, res) => {
         message: 'Token važeći, dobrodošli!',
         user: req.user
     })});
-// POST ruta za login
+
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -19,8 +19,6 @@ router.post('/login', async (req, res) => {
                 console.error('Error querying database:', err);
                 return res.status(500).json({ message: 'Server error' });
             }
-
-            console.log(process.env.JWT_SECRET)
             if (results.length == 0) {
                 return res.status(409).json({ message: 'Korisnik sa ovim emailom ne postoji.' });
             }

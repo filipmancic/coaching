@@ -14,7 +14,6 @@ router.get('/ishrana', (req,res)=>{
             if (results.length === 0) {
                 return res.status(404).json({ message: 'Trenutno nemate plan ishrane.' });
             }
-            //console.log(results)
             return res.status(200).json({
                 message: 'Uspešno fetchovanje',
                 data: results,
@@ -36,7 +35,8 @@ router.get('/plan', (req, res) => {
     v.naziv AS vezba_naziv,
     v.opis AS vezba_opis,
     tv.tezina AS tezina,
-    tv.broj_ponavljanja AS broj_ponavljanja
+    tv.broj_ponavljanja AS broj_ponavljanja,
+    tv.napomena as napomena
 FROM 
     klijent k
 JOIN 
@@ -61,7 +61,6 @@ WHERE
             if (results.length === 0) {
                 return res.status(404).json({ message: 'Trenutno nemate ni jedan plan treninga.' });
             }
-            //console.log(results)
             return res.status(200).json({
                 message: 'Uspešno fetchovanje',
                 data: results,
